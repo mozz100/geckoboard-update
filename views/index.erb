@@ -1,56 +1,72 @@
 <html>
 <head>
-  <link rel="stylesheet" href="/css/bootstrap.min.css">
-  <style>
-  /* Hmm, for some reason we have to set this here */
-  input{
-    height:28px;
-  }
-  </style>
+  <title>Geckoboard update</title>
+  <link rel="stylesheet" href="/css/bootstrap.min.css"></link>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+  <script type="text/javascript">
+    $(function() {
+      $('form').submit(function(e) {
+        // intercept form submit and do by AJAX instead
+        frm = $(this);
+        frm.find('input:submit').attr({disabled: true, value: 'Updating...'});
+        $('#feedback').fadeOut('fast');
+        $.ajax({
+          context: frm,
+          complete: function() {
+            // reset ui to normal
+            $(this).find('input:submit').attr({disabled: null, value: 'Update'});
+          },
+          data: frm.serialize(),
+          error: function(jqXHR, textStatus, errorThrown) {
+            alert('An error occurred.\n' + errorThrown);
+          },
+          success: function(data) {
+            $('#feedback').hide().removeClass();
+            $('#feedback').text(data);
+            $('#feedback').addClass('alert alert-success').fadeIn();
+          },
+          type: 'POST',
+          url: '/push'
+        });
+        e.preventDefault();
+      });
+    })
+  </script>
+  <style>input {height: 28px;}</style>
 </head>
 <body>
   <div class="container">
     <section style="padding-top:60px">
       <div class="page-header">
-        <h1>Geckoboard Push API Tester</h1>
+        <h1>Geckoboard Update</h1>
       </div>
-      <p>This is a simple tool to demonstrate and test the Geckoboard Push API. For more information about the Push API see the <a href="http://docs.geckoboard.com/api/push.html">documentation site</a>.</p>
-      <% if !session[:error].nil? then %>
-      <div class="alert alert-error"><%= session[:error] %></div>
-      <% session.delete(:error)%>
+      <div style="height: 40px">
+        <div id="feedback" class="alert" style="display: none;">
+          <!-- text and class gets set by jquery -->
+        </div>
+      </div>
+      <% @widgets.select{|w| w['type'] == 'text'}.each do |widget| %>
+        <form method="POST" action="/push" class="form-horizontal">
+          <label for="text"><%= widget['label'] %></label>
+          <span class="input">
+            <% (widget['num_pages'] || 1).times do |p| %>
+              <input
+                type="text"
+                id="text"
+                name="widget_data[][text]" 
+                class="input-xlarge"
+                placeholder="<%= p == 0 ? "(text)" : "page #{p+1} (optional)"  %>"
+              />
+            <% end %>
+          </span>
+          <input type="hidden" name="widget_type" value="text"/>
+          <input type="hidden" name="widget_key" value="<%= widget['key'] %>"/>
+          <input type="hidden" name="api_key" value="<%= @api_key %>"/>
+          <span class="actions">
+            <input type="submit" class="btn primary" value="Update">
+          </span>
+        </form>
       <% end %>
-      
-      <% if !session[:message].nil? then %>
-        <div class="alert alert-success"><%= session[:message] %></div>
-      <% session.delete(:message)%>
-      <% end %>
-
-      <form method="POST" action="/push">
-        <fieldset>
-          <div class="clearfix">
-            <label for="text">Message</label>
-            <div class="input">
-              <textarea name="text" class="xlarge"><%= session[:data].fetch('text', nil) %></textarea>
-            </div>
-          </div>
-          <div class="clearfix">
-            <label for="widget_key">Widget Key</label>
-            <div class="input">
-              <input type="text" name="widget_key" class="xlarge" size="30" value="<%= session[:data].fetch('widget_key', nil) %>"/>
-            </div>
-          </div>
-          <div class="clearfix" <%= 'style="display: none;"' unless session[:data]['api_key'].nil? %>>
-            <label for="api_key">API Key</label>
-            <div class="input">
-              <input type="text" name="api_key" class="xlarge" size="30" value="<%= session[:data].fetch('api_key', nil) %>"/>
-            </div>
-          </div>
-          <div class="actions">
-                      <input type="submit" class="btn primary" value="Submit">
-          </div>
-          <% session.delete(:data)%>
-        </fieldset>
-      </form>
     </div>
   </div>
 </body>

@@ -1,0 +1,11 @@
+geckoboard_api_key: "put_your_api_key_here"
+widgets:
+
+  - type:      text
+    key:       "10151-4e40ad1e9e0d02525607767c505c7c24"
+    label:     "Multi-text example"
+    num_pages: 3
+
+  - type:  text
+    key:   "10151-b0e68b44d222306de30ccbd18756310e"
+    label: "Single field"
