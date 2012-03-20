@@ -1,43 +1,37 @@
 require 'rubygems'
 require 'sinatra'
 require 'json'
-require 'rest_client'
+require 'geckoboard-push'
 
 enable :sessions
 
 get '/' do
+
   if session[:data].nil? then
-    session[:data] = {}
+    session[:data] = {
+      # if set, environment variable GECKOBOARD_API_KEY will be used and the user won't be asked for API key
+      'api_key' => ENV['GECKOBOARD_API_KEY']  
+    }
   end
   
   erb :index
 end
 
 post '/push' do
-  # take the three parameters and push in the correct format to GB
-  url = "https://push.geckoboard.com/v1/send/#{params[:widget_key]}"
-  
-  data = {:item => [{:text=>params[:text], :type => 0}]}
-  payload = {:api_key => params[:api_key], :data => data}
-  
-  # fire off the request
-  begin
-    response = RestClient.post url, payload.to_json, :content_type => "application/json"
-    session[:message] = "Successfully updated widget!"
 
-  rescue RestClient::Exception => e
-    # oops, got an error. Try to parse it and display to the user
+  # take the three parameters and push to Geckoboard
+  begin
+    Geckoboard::Push.api_key = params['api_key']
+    response = Geckoboard::Push.new(params['widget_key']).text [{:text => params['text']}]
+    session[:message] = "Successfully updated widget!"
+  rescue Exception => e
+    # oops, got an error. Try to display to the user
     # puts e
-    puts "got an error"
     puts e.message
-    body = JSON.parse(e.response.body)
-    session[:error] = body["error"]
-    session[:data] = {
-      :api_key => params[:api_key],
-      :text => params[:text],
-      :widget_key => params[:widget_key]
-    }
+    session[:error] = "Sorry, an error occurred: '#{e.message}'"
   end
   
+  session[:data] = {}.merge(params)  # retain what was POSTed when redrawing the page.
   redirect '/'
+
 end
