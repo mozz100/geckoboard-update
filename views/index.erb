@@ -3,35 +3,7 @@
   <title>Geckoboard update</title>
   <link rel="stylesheet" href="/css/bootstrap.min.css"></link>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
-  <script type="text/javascript">
-    $(function() {
-      $('form').submit(function(e) {
-        // intercept form submit and do by AJAX instead
-        frm = $(this);
-        frm.find('input:submit').attr({disabled: true, value: 'Updating...'});
-        $('#feedback').fadeOut('fast');
-        $.ajax({
-          context: frm,
-          complete: function() {
-            // reset ui to normal
-            $(this).find('input:submit').attr({disabled: null, value: 'Update'});
-          },
-          data: frm.serialize(),
-          error: function(jqXHR, textStatus, errorThrown) {
-            alert('An error occurred.\n' + errorThrown);
-          },
-          success: function(data) {
-            $('#feedback').hide().removeClass();
-            $('#feedback').text(data);
-            $('#feedback').addClass('alert alert-success').fadeIn();
-          },
-          type: 'POST',
-          url: '/push'
-        });
-        e.preventDefault();
-      });
-    })
-  </script>
+  <script type="text/javascript" src="/js/app.js"></script>
   <style>input {height: 28px;}</style>
 </head>
 <body>
@@ -46,13 +18,13 @@
         </div>
       </div>
       <% @widgets.select{|w| w['type'] == 'text'}.each do |widget| %>
-        <form method="POST" action="/push" class="form-horizontal">
+        <form method="POST" action="/push" class="form-horizontal" id="frm_<%= widget['key'] %>">
           <label for="text"><%= widget['label'] %></label>
           <span class="input">
             <% (widget['num_pages'] || 1).times do |p| %>
               <input
                 type="text"
-                id="text"
+                id="text_<%= widget['key'] %>_<%= p %>"
                 name="widget_data[][text]" 
                 class="input-xlarge"
                 placeholder="<%= p == 0 ? "(text)" : "page #{p+1} (optional)"  %>"
