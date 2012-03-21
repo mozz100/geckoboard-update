@@ -13,7 +13,15 @@ class Hash
 end
 
 get '/' do
-  @config = YAML.load_file("config.yml")
+  # load config-local.yml in preference to config.yml.
+  # The former is excluded from source control via .gitignore so is good for keeping
+  # private data.
+  if File.exist? "config-local.yml"
+    @config = YAML.load_file("config-local.yml")
+  else
+    @config = YAML.load_file("config.yml")
+  end
+
   @widgets = @config['widgets']
 
   # if set, environment variable GECKOBOARD_API_KEY will override settings.yml
