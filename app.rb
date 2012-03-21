@@ -12,7 +12,7 @@ class Hash
   end
 end
 
-get '/' do
+def load_config
   # load config-local.yml in preference to config.yml.
   # The former is excluded from source control via .gitignore so is good for keeping
   # private data.
@@ -21,6 +21,13 @@ get '/' do
   else
     @config = YAML.load_file("config.yml")
   end
+end
+
+load_config
+set :port, (@config['port'] || 4567)
+
+get '/' do
+  load_config
 
   @widgets = @config['widgets']
 
