@@ -9,3 +9,7 @@ widgets:
   - type:  text
     key:   "10151-b0e68b44d222306de30ccbd18756310e"
     label: "Single field"
+
+  - type:      geckometer
+    key:       "10151-f2f2979e67ce09b79804c0a082932319"
+    label:     "Sales, $K"    

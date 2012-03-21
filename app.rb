@@ -42,6 +42,12 @@ post '/push' do
       data = params[:widget_data].map(&:symbolize_keys!).select{|t| !t[:text].empty? }
       raise 'No input data' if data.empty?
       it_worked = Geckoboard::Push.new(params[:widget_key]).text(data)
+    elsif params[:widget_type] == "geckometer"
+      data = params[:widget_data].symbolize_keys!
+      # check that value, min and max are all present
+      missing = [:value, :min, :max].select{|i| data[i].empty?}
+      raise "Missing: #{missing.map(&:to_s).join(", ")}" unless missing.empty?
+      it_worked = Geckoboard::Push.new(params[:widget_key]).geckometer(data[:value], data[:min], data[:max])
     else
       raise "Not supporting '#{params[:widget_type]}' widgets yet."
     end

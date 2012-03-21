@@ -17,21 +17,35 @@
           <!-- text and class gets set by jquery -->
         </div>
       </div>
-      <% @widgets.select{|w| w['type'] == 'text'}.each do |widget| %>
+      <% @widgets.each do |widget| %>
         <form method="POST" action="/push" class="form-horizontal" id="frm_<%= widget['key'] %>">
-          <label for="text"><%= widget['label'] %></label>
+          <h4><%= widget['label'] %></h4>
           <span class="input">
-            <% (widget['num_pages'] || 1).times do |p| %>
-              <input
-                type="text"
-                id="text_<%= widget['key'] %>_<%= p %>"
-                name="widget_data[][text]" 
-                class="input-xlarge"
-                placeholder="<%= p == 0 ? "(text)" : "page #{p+1} (optional)"  %>"
-              />
+            <% if widget['type'] == 'text' %>
+              <% (widget['num_pages'] || 1).times do |p| %>
+                <% input_uid = "#{widget['key']}_#{p}" %>
+                <input
+                  type="text"
+                  id="text_<%= input_uid %>"
+                  name="widget_data[][text]" 
+                  class="input-xlarge"
+                  placeholder="<%= p == 0 ? "(text)" : "page #{p+1} (optional)"  %>"
+                />
+              <% end %>
+            <% elsif widget['type'] == 'geckometer' %>
+              <% ['value','min','max'].each do |i| %>
+                <span><%= i %></span>
+                <input
+                  type="text"
+                  id="<%= i %>_<%= widget['key'] %>"
+                  name="widget_data[<%= i %>]"
+                  class=""
+                  placeholder="<%= i %>"
+                />
+              <% end %>
             <% end %>
           </span>
-          <input type="hidden" name="widget_type" value="text"/>
+          <input type="hidden" name="widget_type" value="<%= widget['type'] %>"/>
           <input type="hidden" name="widget_key" value="<%= widget['key'] %>"/>
           <input type="hidden" name="api_key" value="<%= @api_key %>"/>
           <span class="actions">

@@ -19,7 +19,7 @@ updates, but only by looking at the Geckoboard will they be able to see the othe
 Configuration
 =============
 
-See config.yml.  Currently only text widgets supported, could be easily expanded.
+See config.yml.  Currently only text and geckometer widgets supported, could be easily expanded.
 
 Licence
 =======
