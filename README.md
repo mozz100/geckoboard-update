@@ -2,6 +2,7 @@ Credits
 =======
 
 Built on the hard work of:
+
 * GeckoBoard (https://github.com/geckoboard/push-sinatra-example)
 * Elliott Draper (https://github.com/kickcode/geckoboard-push)
 
